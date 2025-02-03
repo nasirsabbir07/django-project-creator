@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import secrets
 import string
@@ -154,18 +155,53 @@ def setup_venv(base_dir):
     """Creates a virtual environment and installs dependencies inside it."""
     print("🔧 Setting up virtual environment...")
     venv_path = os.path.join(base_dir, ".venv")
+    vscode_settings_path = os.path.join(base_dir, ".vscode", "settings.json")
 
     # Step 1: Create the virtual environment
     subprocess.run([sys.executable, "-m", "venv", venv_path], check=True)
 
-    # Step 2: Determine Python and Pip paths inside .venv
+    # Step 2: Determine Python executable and pip in the virtual environment
     if os.name == "nt":  # Windows
-        pip_path = os.path.join(venv_path, "Scripts", "pip.exe")
+        python_executable = os.path.join(venv_path, "Scripts", "python.exe")
+        pip_executable = os.path.join(venv_path, "Scripts", "pip.exe")
     else:  # macOS/Linux
-        pip_path = os.path.join(venv_path, "bin", "pip")
+        python_executable = os.path.join(venv_path, "bin", "python")
+        pip_executable = os.path.join(venv_path, "bin", "pip")
 
-    # Step 3: Install dependencies inside the virtual environment
-    subprocess.run([pip_path, "install", "-r", os.path.join(base_dir, "requirements.txt")], check=True)
+    # Debugging: Print the paths to the Python and pip executables
+    print(f"Using Python from: {python_executable}")
+    print(f"Using pip from: {pip_executable}")
+
+    # Check if python and pip exist in the virtual environment
+    if not os.path.exists(pip_executable):
+        print("❌ pip not found in the virtual environment. Please check the environment.")
+        return
+    if not os.path.exists(python_executable):
+        print("❌ Python not found in the virtual environment. Please check the environment.")
+        return
+
+    # Step 3: Install dependencies using pip inside the virtual environment
+    subprocess.run([pip_executable, "install", "-r", os.path.join(base_dir, "requirements.txt")], check=True)
+
+    # Step 4: Ensure the .vscode/settings.json directory exists
+    if not os.path.exists(os.path.dirname(vscode_settings_path)):
+        os.makedirs(os.path.dirname(vscode_settings_path))
+
+    # Step 5: Define the pythonPath for VSCode settings.json
+    python_path = (
+        os.path.join(venv_path, "Scripts", "python.exe")
+        if os.name == "nt"
+        else os.path.join(venv_path, "bin", "python")
+    )
+
+    vscode_settings = {
+        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+        "python.terminal.activateEnvironment": True,
+    }
+
+    # Step 6: Write the VSCode settings to the settings.json file
+    with open(vscode_settings_path, "w") as settings_file:
+        json.dump(vscode_settings, settings_file, indent=4)
 
     print("✅ Virtual environment created and dependencies installed.")
 
@@ -198,7 +234,7 @@ def modify_manage_py(base_dir):
     with open(manage_py_path, "r") as f:
         content = f.read()
 
-    environment = os.getenv("ENVIRONMENT", "development")
+    environment = os.getenv("ENVIRONMENT", "dev")
     settings_module = f"config.settings.{environment}"
 
     content = content.replace(
@@ -216,7 +252,7 @@ def modify_wsgi_asgi(base_dir):
     wsgi_path = os.path.join(base_dir, "config", "wsgi.py")
     asgi_path = os.path.join(base_dir, "config", "asgi.py")
 
-    environment = os.getenv("ENVIRONMENT", "development")  # Get environment dynamically
+    environment = os.getenv("ENVIRONMENT", "dev")  # Get environment dynamically
     settings_module = f"config.settings.{environment}"  # Dynamically set the settings module
 
     # Modify wsgi.py
