@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import secrets
+import shutil
 import string
 import subprocess
 import sys
@@ -278,6 +279,27 @@ def modify_wsgi_asgi(base_dir):
     print("✅ wsgi.py and asgi.py modified.")
 
 
+def setup_scripts_folder(project_dir):
+    """Ensure the scripts directory exisits and adds the create_app.py script."""
+
+    scripts_dir = os.path.join(project_dir, "scripts")
+
+    # Create scripts directory if it doesn't exist
+    if not os.path.exists(scripts_dir):
+        os.makedirs(scripts_dir)
+
+    # Define source and destination for create_app.py
+    template_app_script = os.path.join(os.path.dirname(__file__), "create_app.py")
+    dest_app_script = os.path.join(scripts_dir, "create_app.py")
+
+    # Copy create_app.py if it doesn't already exist in the scripts folder
+    if not os.path.exists(dest_app_script):
+        shutil.copy(template_app_script, dest_app_script)
+        print("✅ `create_app.py` has been added to the `scripts/` folder.")
+    else:
+        print("ℹ️ `create_app.py` already exists in `scripts/`.")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Create a Django project with a double-folder structure.")
     parser.add_argument("project_name", type=str, help="The name of the Django project.")
@@ -300,6 +322,8 @@ def main():
 
     # Step 3: Modify wsgi.py and asgi.py for environment-specific settings
     modify_wsgi_asgi(base_dir)
+
+    setup_scripts_folder(base_dir)
 
     print("🎉 Django project setup complete! Activate the virtual environment using:")
     if os.name == "nt":

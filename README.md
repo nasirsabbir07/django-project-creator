@@ -91,7 +91,7 @@ Store the script in a preferred directory, such as:
 2. Run the CLI command with the project name:
 
    ```
-   setup_django myproject
+   create-django myproject
    ```
 
 3. Once completed, activate the virtual environment:
@@ -106,6 +106,19 @@ Store the script in a preferred directory, such as:
    cd myproject
    python manage.py runserver
    ```
+
+## Creating apps
+
+In order to create django apps and register them automatically `create_app.py` script has been added. This will create a new django-app inside the `apps` directory and register it inside the `base.py` file as `apps.app_name`.
+
+#### How to Use 🚀💡🎯
+
+### Windows 🏁🖥️🔄
+
+1. Open **Terminal** in vs-code
+
+2. Run the this command:
+   `python scripts/create_app.py app_name`
 
 ## Environment Configuration 🛠️🔑📜
 
