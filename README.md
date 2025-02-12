@@ -9,6 +9,7 @@ This script automates the creation of a Django project with a double-folder stru
 - Initializes a virtual environment and installs dependencies.
 - Creates `.env` files for different environments (development, staging, production).
 - Modifies `manage.py`, `wsgi.py`, and `asgi.py` to dynamically use the environment settings.
+- Creating apps with necessary files utilizing double folder structure.
 - **Available as a CLI tool with system path configuration!** 🎉🖥️💡
 
 ## Installation & Usage 🛠️📌💻
@@ -117,8 +118,10 @@ In order to create django apps and register them automatically `create_app.py` s
 
 1. Open **Terminal** in vs-code
 
-2. Run the this command:
-   `python scripts/create_app.py app_name`
+2. Run this python command:
+   ```
+   python scripts/create_app.py app_name
+   ```
 
 ## Environment Configuration 🛠️🔑📜
 
